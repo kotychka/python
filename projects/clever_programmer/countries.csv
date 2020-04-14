@@ -1,0 +1,13 @@
+,Headers,Values for today,Values for yesterday
+0,CountryOther,Total:,Total:
+1,TotalCases,"1,866,458","1,852,257"
+2,NewCases,"+14,201","+72,514"
+3,TotalDeaths,"115,244","114,194"
+4,NewDeaths,"+1,050","+5,415"
+5,TotalRecovered,"433,915","423,311"
+6,ActiveCases,"1,317,299","1,314,752"
+7,SeriousCritical,"50,814","50,776"
+8,TotCases-1M pop,239.4,237.6
+9,Deaths-1M pop,14.8,14.7
+10,TotalTests,,
+11,Tests-1M pop,,
