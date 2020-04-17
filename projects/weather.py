@@ -1,9 +1,12 @@
+import sys
+sys.path.insert(1, '../keys/')
 import pyowm
+import config
 from colorama import init
 init()
 from colorama import Fore, Back, Style
 
-owm = pyowm.OWM('385572756a72f12ab127c4c8bfdaeb79')  # You MUST provide a valid API key
+owm = pyowm.OWM(config.owm_key)  # You MUST provide a valid API key
 
 print(Fore.BLACK)
 print(Back.GREEN)

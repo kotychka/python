@@ -1,7 +1,9 @@
+import sys
+sys.path.insert(1, '../keys/')
 import telebot
 # from telebot import apihelper
 
-bot = telebot.TeleBot("1259408766:AAH7lYkYSyUwtSQU-g_VaQdDX2j4x0FaoYA")
+bot = telebot.TeleBot(config.token_bot)
 
 # apihelper.proxy = {
 #     'http': 'http://217.182.230.15:4469',
