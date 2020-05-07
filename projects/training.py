@@ -1,51 +1,12 @@
-## Pie chart with grouping together all elements whose value is less than 2000rub
-dic = feb.sort_values(ascending=False).to_dict()
-newdic={}
-# grouping small elements in one group
-for key, group in itertools.groupby(dic, lambda k: 'Остальное' if (dic[k]<=2000) else k):
-    newdic[key] = sum([dic[k] for k in list(group)])
-
-labels = newdic.keys()
-sizes = newdic.values()
-
-fig, ax = plt.subplots()
-ax.pie(sizes, labels=labels, autopct=make_autopct(sizes), startangle=0, shadow=True)
-ax.axis('equal')
-ax.set_title("February "+str(int(feb.sum()))+" rub.", fontsize=14)
-plt.tight_layout()
-plt.show()
-
-## Pie chart with grouping together all elements whose value is less than 2000rub
-dic = march.sort_values().to_dict()
-newdic={}
-# grouping small elements in one group
-for key, group in itertools.groupby(dic, lambda k: 'Остальное' if (dic[k]<=2000) else k):
-    newdic[key] = sum([dic[k] for k in list(group)])
-
-labels = newdic.keys()
-sizes = newdic.values()
-
-fig, ax = plt.subplots()
-ax.pie(sizes, labels=labels, autopct=make_autopct(sizes), startangle=0, shadow=True)
-ax.axis('equal')
-ax.set_title("March "+str(int(march.sum()))+" rub.", fontsize=14)
-plt.tight_layout()
-plt.show()
+import re
+def check_zip_code(text):
+  result = re.search(r" [0-9]{5}-?", text)
+  # print(result)
+  return result != None
 
 
-## Pie chart with grouping together all elements whose value is less than 2000rub
-dic = aprl.sort_values(ascending=False).to_dict()
-newdic={}
-# grouping small elements in one group
-for key, group in itertools.groupby(dic, lambda k: 'Остальное' if (dic[k]<=2000) else k):
-    newdic[key] = sum([dic[k] for k in list(group)])
-
-labels = newdic.keys()
-sizes = newdic.values()
-
-fig, ax = plt.subplots()
-ax.pie(sizes, labels=labels, autopct=make_autopct(sizes), startangle=0, shadow=True)
-ax.axis('equal')
-ax.set_title("April: "+str(int(aprl.sum()))+" rub.", fontsize=14)
-plt.tight_layout()
-plt.show()
+# print(check_zip_code("dfsd 11046 dsf")) # True
+print(check_zip_code("The zip codes for New York are 10001 thru 11104.")) # True
+print(check_zip_code("90210 is a TV show")) # False
+print(check_zip_code("Their address is: 123 Main Street, Anytown, AZ 85258-0001.")) # True
+print(check_zip_code("The Parliament of Canada is at 111 Wellington St, Ottawa, ON K1A0A9.")) # False

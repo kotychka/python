@@ -114,7 +114,6 @@ plt.grid(True)
 plt.legend(fontsize=16)
 plt.savefig('Bars with income and expences subcats wise.pdf')
 # plt.show()
-# plt.savefig('Bars with income and expences subcats wise (data without prepayments).pdf')
 
 
 # In[13]:
