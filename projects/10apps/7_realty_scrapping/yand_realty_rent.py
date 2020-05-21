@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[43]:
+# In[1]:
 
 
 import requests, re
 from bs4 import BeautifulSoup
 import pandas as pd
+from datetime import datetime as dt
 
 
-# In[44]:
+# In[2]:
 
 
 url = 'https://realty.yandex.ru/sankt-peterburg/snyat/kvartira/studiya/metro-devyatkino/?metroTransport=ON_FOOT&timeToMetro=10&sort=DATE_DESC'
@@ -20,11 +21,11 @@ soup=BeautifulSoup(requests.get(url).content,"html.parser")
 page_numb=int(int(soup.find("div",{"FormField_name_submit"}).text.split(' ')[1])/20)
 
 
-# In[46]:
+# In[54]:
 
 
 apartm_list=[]
-for page in range(0,int(page_numb/4)+1):
+for page in range(0,int(page_numb/4)):
     soup=BeautifulSoup(requests.get(url_to_pages+str(page)).content,"html.parser")
     data=soup.find_all("ol",{"OffersSerp__list"})[0].find_all('li',{'OffersSerpItem'})
     print(page) # to track if there would be an error
@@ -33,11 +34,18 @@ for page in range(0,int(page_numb/4)+1):
         link=site+item.find('a',{'OffersSerpItem__link'}, href=True)['href']
         new_soup=BeautifulSoup(requests.get(link).content,"html.parser").find_all('div',{'Offer'})[0]
         build=item.find_all('div',{'OffersSerpItem__building'})[0].text.split(', ')
-        print(build[0]+' '+build[1]) # to track if there would be an error
+        print(build) # to track if there would be an error
         
         apartm_dict['title']=item.find('h3',{'OffersSerpItem__title'}).text     
         apartm_dict['zhk']=build[0]
-        apartm_dict['layer']=build[1]
+        try:
+            apartm_dict['layer']=build[1]
+        except:
+            if 'этаж' in build[0]:
+                apartm_dict['layer']=build[0]
+                apartm_dict['zhk']=None
+            else:
+                apartm_dict['layer']=None
         apartm_dict['address']=item.find('div',{'OffersSerpItem__address'}).text
         try:
             fees=new_soup.find('span',{'OfferDealDescription__info-item'}).text
@@ -47,7 +55,7 @@ for page in range(0,int(page_numb/4)+1):
                 apartm_dict['fees']=None  
         except:
             apartm_dict['fees']=None
-        apartm_dict['location']=item.find('span',{'MetroWithTime__body'}).text[10:]
+        apartm_dict['location']=item.find('span',{'MetroWithTime__body'}).text[10:-5]
         apartm_dict['price']=item.find('span',{'price'}).text
         try:
             apartm_dict['desc']=item.find('p',{'OffersSerpItem__description'}).text
@@ -72,24 +80,31 @@ df=pd.DataFrame(apartm_list)
 df.to_excel("first.xlsx")
 
 
-# In[ ]:
+# In[55]:
 
 
 apartm_list=[]
-for page in range(int(page_numb/4),int(page_numb/2)+1):
+for page in range(int(page_numb/4),int(page_numb/2)):
     soup=BeautifulSoup(requests.get(url_to_pages+str(page)).content,"html.parser")
     data=soup.find_all("ol",{"OffersSerp__list"})[0].find_all('li',{'OffersSerpItem'})
     print(page) # to track if there would be an error
-    for item in data[:10]:
+    for item in data:
         apartm_dict={}
         link=site+item.find('a',{'OffersSerpItem__link'}, href=True)['href']
         new_soup=BeautifulSoup(requests.get(link).content,"html.parser").find_all('div',{'Offer'})[0]
         build=item.find_all('div',{'OffersSerpItem__building'})[0].text.split(', ')
-        print(build[0]+' '+build[1]) # to track if there would be an error
+        print(build) # to track if there would be an error
         
         apartm_dict['title']=item.find('h3',{'OffersSerpItem__title'}).text     
         apartm_dict['zhk']=build[0]
-        apartm_dict['layer']=build[1]
+        try:
+            apartm_dict['layer']=build[1]
+        except:
+            if 'этаж' in build[0]:
+                apartm_dict['layer']=build[0]
+                apartm_dict['zhk']=None
+            else:
+                apartm_dict['layer']=None
         apartm_dict['address']=item.find('div',{'OffersSerpItem__address'}).text
         try:
             fees=new_soup.find('span',{'OfferDealDescription__info-item'}).text
@@ -99,7 +114,7 @@ for page in range(int(page_numb/4),int(page_numb/2)+1):
                 apartm_dict['fees']=None  
         except:
             apartm_dict['fees']=None
-        apartm_dict['location']=item.find('span',{'MetroWithTime__body'}).text[10:]
+        apartm_dict['location']=item.find('span',{'MetroWithTime__body'}).text[10:-5]
         apartm_dict['price']=item.find('span',{'price'}).text
         try:
             apartm_dict['desc']=item.find('p',{'OffersSerpItem__description'}).text
@@ -122,28 +137,35 @@ for page in range(int(page_numb/4),int(page_numb/2)+1):
 
 df=pd.DataFrame(apartm_list)
 df.to_excel("second.xlsx")
-result=pd.concat([pd.read_excel("first.xlsx"), df]).reset_index()
-result.to_excel("rent.xlsx")
+result=pd.concat([pd.read_excel("rent_"+str(dt.now())[:11]+".xlsx"), df]).reset_index(drop=True)
+result.to_excel("rent_"+str(dt.now())[:11]+".xlsx")
 
 
-# In[ ]:
+# In[56]:
 
 
 apartm_list=[]
-for page in range(int(page_numb/2),int(page_numb*3/4)+1):
+for page in range(int(page_numb/2),int(page_numb*3/4)):
     soup=BeautifulSoup(requests.get(url_to_pages+str(page)).content,"html.parser")
     data=soup.find_all("ol",{"OffersSerp__list"})[0].find_all('li',{'OffersSerpItem'})
     print(page) # to track if there would be an error
-    for item in data[:10]:
+    for item in data:
         apartm_dict={}
         link=site+item.find('a',{'OffersSerpItem__link'}, href=True)['href']
         new_soup=BeautifulSoup(requests.get(link).content,"html.parser").find_all('div',{'Offer'})[0]
         build=item.find_all('div',{'OffersSerpItem__building'})[0].text.split(', ')
-        print(build[0]+' '+build[1]) # to track if there would be an error
+        print(build) # to track if there would be an error
         
         apartm_dict['title']=item.find('h3',{'OffersSerpItem__title'}).text     
         apartm_dict['zhk']=build[0]
-        apartm_dict['layer']=build[1]
+        try:
+            apartm_dict['layer']=build[1]
+        except:
+            if 'этаж' in build[0]:
+                apartm_dict['layer']=build[0]
+                apartm_dict['zhk']=None
+            else:
+                apartm_dict['layer']=None
         apartm_dict['address']=item.find('div',{'OffersSerpItem__address'}).text
         try:
             fees=new_soup.find('span',{'OfferDealDescription__info-item'}).text
@@ -153,7 +175,7 @@ for page in range(int(page_numb/2),int(page_numb*3/4)+1):
                 apartm_dict['fees']=None  
         except:
             apartm_dict['fees']=None
-        apartm_dict['location']=item.find('span',{'MetroWithTime__body'}).text[10:]
+        apartm_dict['location']=item.find('span',{'MetroWithTime__body'}).text[10:-5]
         apartm_dict['price']=item.find('span',{'price'}).text
         try:
             apartm_dict['desc']=item.find('p',{'OffersSerpItem__description'}).text
@@ -176,11 +198,11 @@ for page in range(int(page_numb/2),int(page_numb*3/4)+1):
 
 df=pd.DataFrame(apartm_list)
 df.to_excel("third.xlsx")
-result=pd.concat([pd.read_excel("rent.xlsx"), df]).reset_index()
-result.to_excel("rent.xlsx")
+result=pd.concat([pd.read_excel("rent_"+str(dt.now())[:11]+".xlsx"), df]).reset_index(drop=True)
+result.to_excel("rent_"+str(dt.now())[:11]+".xlsx")
 
 
-# In[ ]:
+# In[4]:
 
 
 apartm_list=[]
@@ -188,16 +210,23 @@ for page in range(int(page_numb*3/4),page_numb+1):
     soup=BeautifulSoup(requests.get(url_to_pages+str(page)).content,"html.parser")
     data=soup.find_all("ol",{"OffersSerp__list"})[0].find_all('li',{'OffersSerpItem'})
     print(page) # to track if there would be an error
-    for item in data[:10]:
+    for item in data:
         apartm_dict={}
         link=site+item.find('a',{'OffersSerpItem__link'}, href=True)['href']
         new_soup=BeautifulSoup(requests.get(link).content,"html.parser").find_all('div',{'Offer'})[0]
         build=item.find_all('div',{'OffersSerpItem__building'})[0].text.split(', ')
-        print(build[0]+' '+build[1]) # to track if there would be an error
+        print(build) # to track if there would be an error
         
         apartm_dict['title']=item.find('h3',{'OffersSerpItem__title'}).text     
         apartm_dict['zhk']=build[0]
-        apartm_dict['layer']=build[1]
+        try:
+            apartm_dict['layer']=build[1]
+        except:
+            if 'этаж' in build[0]:
+                apartm_dict['layer']=build[0]
+                apartm_dict['zhk']=None
+            else:
+                apartm_dict['layer']=None
         apartm_dict['address']=item.find('div',{'OffersSerpItem__address'}).text
         try:
             fees=new_soup.find('span',{'OfferDealDescription__info-item'}).text
@@ -207,7 +236,7 @@ for page in range(int(page_numb*3/4),page_numb+1):
                 apartm_dict['fees']=None  
         except:
             apartm_dict['fees']=None
-        apartm_dict['location']=item.find('span',{'MetroWithTime__body'}).text[10:]
+        apartm_dict['location']=item.find('span',{'MetroWithTime__body'}).text[10:-5]
         apartm_dict['price']=item.find('span',{'price'}).text
         try:
             apartm_dict['desc']=item.find('p',{'OffersSerpItem__description'}).text
@@ -230,22 +259,74 @@ for page in range(int(page_numb*3/4),page_numb+1):
 
 df=pd.DataFrame(apartm_list)
 df.to_excel("fourth.xlsx")
-result=pd.concat([pd.read_excel("rent.xlsx"), df]).reset_index()
-result.to_excel("rent.xlsx")
+result=pd.concat([pd.read_excel("rent_"+str(dt.now())[:11]+".xlsx"), df]).reset_index(drop=True)
+result.to_excel("rent_"+str(dt.now())[:11]+".xlsx")
+result.drop(['Unnamed: 0','Unnamed: 0.1.1','Unnamed: 0.1.1.1','level_0','index']], axis=1, inplace=True)
+result.to_excel("rent_"+str(dt.now())[:11]+".xlsx")
+
+
+# In[9]:
+
+
+result=pd.concat([pd.read_excel("rent_"+str(dt.now())[:11]+".xlsx"), df]).reset_index(drop=True)
+def metro(loc): return 'Close' if loc<=11 else 'Far'
+result['metro']=[metro(loc) for loc in result.location]
+result.drop(['Unnamed: 0','Unnamed: 0.1.1','Unnamed: 0.1.1.1','level_0','index'], axis=1, inplace=True)
+result.drop_duplicates(keep=first, inplace=True)
+result.to_excel("rent_"+str(dt.now())[:11]+".xlsx")
+
+
+# In[53]:
+
+
+result=pd.concat([pd.read_excel("first.xlsx"), pd.read_excel("second.xlsx"), pd.read_excel("third.xlsx"), pd.read_excel("fourth.xlsx")]).reset_index(drop=True)
+result.drop(['Unnamed: 0'], axis=1, inplace=True)
+def metro(loc): return 'Close' if loc<=11 else 'Far'
+result['metro']=[metro(loc) for loc in result.location]
+result.drop_duplicates(keep=first, inplace=True)
+result.to_excel("rent_v2_"+str(dt.now())[:11]+".xlsx")
 
 
 # In[ ]:
 
 
-result=pd.concat([pd.read_excel("first.xlsx"), pd.read_excel("second.xlsx"), pd.read_excel("third.xlsx"), pd.read_excel("fourth.xlsx")]).reset_index()
-result.to_excel("rent.xlsx")
 
 
-# In[42]:
+
+# In[ ]:
 
 
-result=pd.concat([pd.read_excel("rent_dev1.xlsx"), pd.read_excel("rent_dev2.xlsx")]).reset_index()
-result.to_excel("rent.xlsx")
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:
